@@ -10,8 +10,6 @@ def index(request):
 
 
 # Login function
-
-
 def login(request):
     c = {}
     c.update(csrf(request))
@@ -19,8 +17,6 @@ def login(request):
 
 
 # Authentications
-
-
 def dj_auth(request):
     username = request.POST.get('username', '')
     password = request.POST.get('password', '')
@@ -34,21 +30,16 @@ def dj_auth(request):
 
 
 # Show user profile
-
-
 def profile(request):
     return render_to_response('profile.html', {'full_name': request.user.username})
 
 
 # No user
-
-
 def invalid(request):
     return render_to_response('invalid.html')
 
 
 # Logout
-
 def logout(request):
     auth.logout(request)
     return render_to_response('logout.html')
