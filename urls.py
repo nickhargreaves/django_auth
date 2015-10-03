@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^logout/$', django_auth.views.logout),
     url(r'^register/$', django_auth.views.register_user),
     url(r'^register_success/$', django_auth.views.register_success),
+    url(r'^confirm/$', django_auth.views.confirm_email),
 ]
