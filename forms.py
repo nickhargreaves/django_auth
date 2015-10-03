@@ -6,7 +6,6 @@ from django.contrib.auth.forms import UserCreationForm
 class CustomRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
-
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
@@ -16,6 +15,7 @@ class CustomRegistrationForm(UserCreationForm):
         user.email = self.cleaned_data['email']
 
         if commit:
+            # User is inactive on registration
             user.is_active = False
             user.save()
 
