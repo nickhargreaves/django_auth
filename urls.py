@@ -9,4 +9,6 @@ urlpatterns = [
     url(r'^profile/$', django_auth.views.profile),
     url(r'^invalid/$', django_auth.views.invalid),
     url(r'^logout/$', django_auth.views.logout),
+    url(r'^register/$', django_auth.views.register_user),
+    url(r'^register_success/$', django_auth.views.register_success),
 ]
