@@ -272,9 +272,10 @@ html {
   line-height: 24px;
 }
 .sminputs .input input {
+    height: 30px;
+    padding: 10px;
   postion: relative;
   display: inline-block;
-  height: 24px;
   font-size: 15px;
   line-height: 19.2px;
   color: #555;
@@ -282,10 +283,8 @@ html {
   vertical-align: middle;
   box-shadow: none;
   box-sizing: border-box;
-  width: 100%;
-  height: auto;
+  width: 90%;
   border: none;
-  padding: 0;
   cursor: pointer;
   background-color: transparent;
   color: rgba(75, 89, 102, 0.85);
