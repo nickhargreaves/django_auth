@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Django Auth</title>
-    </head>
+<html >
+  <head>
+    <meta charset="UTF-8">
+    <title>Login/Sign-In</title>
+    {% load static %}
 
-    <body>
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+
+    <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css'>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  </head>
+
+  <body>
     {% block content %}{% endblock content %}
-    </body>
+
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script src="{% static 'js/index.js' %}"></script>
+
+  </body>
 </html>
