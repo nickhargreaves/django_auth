@@ -10,53 +10,52 @@
     <div class="logmod__container">
       <ul class="logmod__tabs">
         <li data-tabtar="lgm-2"><a href="#">Login</a></li>
-        <li data-tabtar="lgm-1"><a href="#">Sign Up</a></li>
+        <li data-tabtar="lgm-1"><a href="#">Register</a></li>
       </ul>
       <div class="logmod__tab-wrapper">
       <div class="logmod__tab lgm-1">
         <div class="logmod__heading">
           <span class="logmod__heading-subtitle">Enter your personal details <strong>to create an acount</strong></span>
         </div>
+        <form action="/django_auth/auth/" method="post">{% csrf_token %}
         <div class="logmod__form">
-          <form action="/django_auth/auth/" method="post">{% csrf_token %}
             <div class="sminputs">
               <div class="input full">
-                <label class="string optional" for="user-email">Email*</label>
-                <input class="string optional" maxlength="255" id="user-email" placeholder="Email" type="email" size="50" />
-                <input class="string optional" type="text" name="username" value="" id="username" size="50" placeholder="Username">
+                <label class="string optional" for="id_email">Email*</label>
+                <input class="string optional" maxlength="255" id="id_email" name="email" placeholder="Email" type="email" size="50" />
+              </div>
+              <div class="input full">
+                <label class="string optional" for="username">Username*</label>
+                <input id="id_username" maxlength="30" name="username" type="text" placeholder="Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only"/>
               </div>
             </div>
             <div class="sminputs">
               <div class="input string optional">
-                <label class="string optional" for="user-pw">Password *</label>
-                <input class="string optional" maxlength="255" id="user-pw" placeholder="Password" type="text" size="50" />
+                <label class="string optional" for="id_password1">Password *</label>
+                <input class="string optional" maxlength="255" placeholder="Password" size="50" id="id_password1" name="password1" type="password"/>
               </div>
               <div class="input string optional">
-                <label class="string optional" for="user-pw-repeat">Repeat password *</label>
-                <input class="string optional" maxlength="255" id="user-pw-repeat" placeholder="Repeat password" type="text" size="50" />
+                <label class="string optional" for="id_password2">Repeat password *</label>
+                <input class="string optional" maxlength="255" placeholder="Password" size="50" id="id_password2" name="password2" type="password"/>
+
               </div>
             </div>
-          </form>
         </div>
-        <div class="logmod__alter">
+          <div class="logmod__alter">
           <div class="logmod__alter-container">
-
-            <a href="#" class="connect googleplus">
-              <div class="connect__icon">
-              </div>
               <div class="connect__context">
-                <span>Sign Up</span>
+                <input type="submit" value="Register"  class="connect googleplus"/>
               </div>
-            </a>
           </div>
         </div>
+          </form>
       </div>
       <div class="logmod__tab lgm-2">
         <div class="logmod__heading">
           <span class="logmod__heading-subtitle">Enter your email and password <strong>to sign in</strong></span>
         </div>
+          <form action="/django_auth/auth/" method="post">{% csrf_token %}
         <div class="logmod__form">
-          <form accept-charset="utf-8" action="#" class="simform">
             <div class="sminputs">
               <div class="input full">
                 <label class="string optional" for="username">Username*</label>
@@ -67,22 +66,17 @@
               <div class="input full">
                 <label class="string optional" for="user-pw">Password *</label>
                 <input class="string optional" maxlength="255" id="user-pw" placeholder="Password" type="password" size="50" name="password" />
-                						<span class="hide-password">Show</span>
               </div>
             </div>
-          </form>
         </div>
         <div class="logmod__alter">
           <div class="logmod__alter-container">
-            <a href="#" class="connect facebook">
-              <div class="connect__icon">
-              </div>
               <div class="connect__context">
-                <span>Login</span>
+                <input type="submit" value="login"  class="connect facebook"/>
               </div>
-            </a>
           </div>
         </div>
+          </form>
           </div>
       </div>
     </div>

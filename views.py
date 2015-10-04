@@ -88,7 +88,7 @@ def register_user(request):
 
     args['form'] = CustomRegistrationForm()
 
-    return render_to_response('register.html', args)
+    return render_to_response('login_register.html', args)
 
 
 # Register success
