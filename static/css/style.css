@@ -121,7 +121,6 @@ html {
 .logmod__alter {
   display: block;
   position: relative;
-  margin-top: 7px;
 }
 .logmod__alter::after {
   clear: both;
