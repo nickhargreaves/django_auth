@@ -6,5 +6,5 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    activation_key = models.CharField(maxlength=40)
+    activation_key = models.CharField(max_length=40)
     key_expires = models.DateTimeField()
