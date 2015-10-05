@@ -44,7 +44,7 @@ def register_user(request):
         # Send email with activation key
         email_subject = 'Account confirmation'
         email_body = "Hi %s, you have successfully registered but just one last step to get started. To activate your account, click this link within \
-        48hours http://127.0.0.1:8000/accounts/confirm/%s" % (username, activation_key)
+        48hours https://hidden-reef-1355.herokuapp.com/django_auth/confirm/%s" % (username, activation_key)
 
         #send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
 
