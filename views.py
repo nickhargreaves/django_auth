@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -10,7 +11,8 @@ from django_auth.models import UserProfile
 import datetime, random, hashlib
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.mail import send_mail
-
+from twilio.rest import TwilioRestClient
+from django.conf import settings
 
 def index(request):
     args = {}
@@ -46,7 +48,7 @@ def register_user(request):
         email_body = "Hi %s, you have successfully registered but just one last step to get started. To activate your account, click this link within \
         48hours https://hidden-reef-1355.herokuapp.com/django_auth/confirm/%s" % (username, activation_key)
 
-        #send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
+        # send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
 
         return HttpResponseRedirect('/django_auth/register_success')
     else:
@@ -99,3 +101,18 @@ def confirm(request, activation_key):
     user_account.is_active = True
     user_account.save()
     return render_to_response('confirm.html', {'success': True})
+
+
+# Send SMS
+def send_sms(request):
+    
+    send_to = request.POST.get('number', '')
+    send_message = request.POST.get('message', '')
+
+    account = settings.TWILLIO_ACCOUNT
+    token = settings.TWILLIO_TOKEN
+    client = TwilioRestClient(account, token)
+
+    client.messages.create(to=send_to, from_=settings.TWILLIO_FROM,
+                                     body=send_message)
+    return render_to_response('enter_code.html')
