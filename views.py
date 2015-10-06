@@ -105,7 +105,7 @@ def confirm(request, activation_key):
 
 # Send SMS
 def send_sms(request):
-    
+
     send_to = request.POST.get('number', '')
     send_message = request.POST.get('message', '')
 
