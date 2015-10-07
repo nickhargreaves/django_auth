@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html >
+
   <head>
+
     <meta charset="UTF-8">
+
     <title>Login/Sign-In</title>
+
     {% load static %}
 
     <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
@@ -14,10 +18,14 @@
   </head>
 
   <body>
-    {% block content %}{% endblock content %}
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-    <script src="{% static 'js/index.js' %}"></script>
+  {% block content %}
+
+  {% endblock content %}
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src="{% static 'js/index.js' %}"></script>
 
   </body>
+
 </html>

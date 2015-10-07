@@ -31,6 +31,7 @@ def register_user(request):
 
         username = form.cleaned_data['username']
         email = form.cleaned_data['email']
+        phone = form.cleaned_data['phone']
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
         activation_key = hashlib.sha1(salt + email).hexdigest()
         key_expires = datetime.datetime.today() + datetime.timedelta(2)
@@ -40,7 +41,7 @@ def register_user(request):
 
         # Save profile
         new_profile = UserProfile(user=user, activation_key=activation_key,
-                                  key_expires=key_expires)
+                                  key_expires=key_expires, phone_number=phone)
         new_profile.save()
 
         # Send email with activation key
@@ -98,21 +99,18 @@ def confirm(request, activation_key):
     if user_profile.key_expires < datetime.datetime.today():
         return render_to_response('confirm.html', {'expired': True})
     user_account = user_profile.user
+    send_sms(user_profile.phone_number, "test this")
     user_account.is_active = True
     user_account.save()
     return render_to_response('confirm.html', {'success': True})
 
 
 # Send SMS
-def send_sms(request):
-
-    send_to = request.POST.get('number', '')
-    send_message = request.POST.get('message', '')
-
+def send_sms(send_to, send_message):
     account = settings.TWILLIO_ACCOUNT
     token = settings.TWILLIO_TOKEN
     client = TwilioRestClient(account, token)
 
     client.messages.create(to=send_to, from_=settings.TWILLIO_FROM,
                                      body=send_message)
-    return render_to_response('enter_code.html')
+    return None
