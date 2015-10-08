@@ -11,6 +11,6 @@ urlpatterns = [
     url(r'^logout/$', django_auth.views.logout),
     url(r'^register/$', django_auth.views.register_user),
     url(r'^register_success/$', django_auth.views.register_success),
-    url(r'^confirm/$', django_auth.views.confirm),
+    url(r'^confirm/(?P<activation_key>\w+)/$', django_auth.views.confirm),
     url(r'^send_sms/$', django_auth.views.send_sms)
 ]

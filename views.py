@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from twilio.rest import TwilioRestClient
 from django.conf import settings
 
+
 def index(request):
     args = {}
     args.update(csrf(request))
@@ -44,12 +45,14 @@ def register_user(request):
                                   key_expires=key_expires, phone_number=phone)
         new_profile.save()
 
+
         # Send email with activation key
         email_subject = 'Account confirmation'
         email_body = "Hi %s, you have successfully registered but just one last step to get started. To activate your account, click this link within \
-        48hours https://hidden-reef-1355.herokuapp.com/django_auth/confirm/%s" % (username, activation_key)
+        48hours https://hidden-reef-1355.herokuapp.com/django_auth/confirm/%s. You will also receive a message on your phone number %s to confirm your number." % (
+        username, activation_key, new_profile.phone_number)
 
-        # send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
+        send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
 
         return HttpResponseRedirect('/django_auth/register_success')
     else:
@@ -99,10 +102,11 @@ def confirm(request, activation_key):
     if user_profile.key_expires < datetime.datetime.today():
         return render_to_response('confirm.html', {'expired': True})
     user_account = user_profile.user
-    send_sms(user_profile.phone_number, "test this")
+    phone = user_profile.phone_number
+    send_sms(phone, "test this")
     user_account.is_active = True
     user_account.save()
-    return render_to_response('confirm.html', {'success': True})
+    return render_to_response('confirm.html', {'success': True, 'phone': phone})
 
 
 # Send SMS
@@ -112,5 +116,5 @@ def send_sms(send_to, send_message):
     client = TwilioRestClient(account, token)
 
     client.messages.create(to=send_to, from_=settings.TWILLIO_FROM,
-                                     body=send_message)
+                           body=send_message)
     return None
