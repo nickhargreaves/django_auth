@@ -18,12 +18,15 @@ import random
 
 
 def index(request):
-    args = {}
-    args.update(csrf(request))
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/django_auth/profile')
+    else:
+        args = {}
+        args.update(csrf(request))
 
-    args['form'] = CustomRegistrationForm()
+        args['form'] = CustomRegistrationForm()
 
-    return render_to_response('login_register.html', args)
+        return render_to_response('login_register.html', args)
 
 
 # Register user
