@@ -71,8 +71,49 @@ def dj_auth(request):
     user = auth.authenticate(username=username, password=password)
 
     if user is not None:
-        auth.login(request, user)
-        return HttpResponseRedirect('/django_auth/profile')
+        # get user profile
+        user_profile = get_object_or_404(UserProfile,
+                                         username=username)
+        # send confirmation code
+        confirm_code = str(random.randint(1111, 9999))
+        send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
+
+        # add code to user profile
+        user_profile.sms_activation = confirm_code
+        user_profile.save()
+
+        # take to confirm login code screen
+        params = {'username': username, 'password': password}  # TODO: find more secure way
+        params.update(csrf(request))
+
+        return render_to_response('confirm.html', params)
+
+    else:
+        return HttpResponseRedirect('/django_auth/invalid')
+
+
+# Process login confirmation code
+def confirm_login_code(request):
+    username = request.POST.get('username', '')
+    password = request.POST.get('password', '')
+    user = auth.authenticate(username=username, password=password)
+
+    if user is not None:
+        confirm_code = request.POST.get('confirm_code', '')
+
+        user_profile = get_object_or_404(UserProfile,
+                                         sms_activation=confirm_code)
+        # check if is correct confirmation code
+        if user_profile.sms_activation == confirm_code:
+            # login user
+            auth.login(request, user)
+            # reset confirm code
+            user_profile.sms_activation = "000"
+            user_profile.save()
+            # take to profile
+            return HttpResponseRedirect('/django_auth/profile')
+        else:
+            return HttpResponseRedirect('/django_auth/invalid_code')
     else:
         return HttpResponseRedirect('/django_auth/invalid')
 
@@ -127,7 +168,7 @@ def confirm_reg_code(request):
     confirm_code = request.POST.get('confirm_code', '')
 
     user_profile = get_object_or_404(UserProfile,
-                                         sms_activation=confirm_code)
+                                     sms_activation=confirm_code)
     # check if is correct confirmation code
     if user_profile.sms_activation == confirm_code:
         # set to active

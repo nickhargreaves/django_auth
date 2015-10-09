@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^register/$', django_auth.views.register_user),
     url(r'^register_success/$', django_auth.views.register_success),
     url(r'^confirm/(?P<activation_key>\w+)/$', django_auth.views.confirm),
-    url(r'^confirm_reg_code/$', django_auth.views.confirm_reg_code)
+    url(r'^confirm_reg_code/$', django_auth.views.confirm_reg_code),
+    url(r'^confirm_login_code/$', django_auth.views.confirm_login_code)
 ]
