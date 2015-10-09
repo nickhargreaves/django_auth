@@ -79,10 +79,8 @@ def dj_auth(request):
 
 # Show user profile
 def profile(request):
-    user_profile = get_object_or_404(UserProfile,
-                                     user=request.user)
     return render_to_response('profile.html',
-                              {'full_name': request.user.username, 'phone_number': user_profile.phone_number})
+                              {'full_name': request.user.username})
 
 
 # No user
