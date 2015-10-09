@@ -16,6 +16,7 @@ from twilio.rest import TwilioRestClient
 from django.conf import settings
 import random
 
+
 def index(request):
     args = {}
     args.update(csrf(request))
@@ -36,7 +37,8 @@ def register_user(request):
         phone = form.cleaned_data['phone']
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
         activation_key = hashlib.sha1(salt + email).hexdigest()
-        key_expires = timezone.make_aware(datetime.datetime.today() + datetime.timedelta(2), timezone.get_default_timezone())
+        key_expires = timezone.make_aware(datetime.datetime.today() + datetime.timedelta(2),
+                                          timezone.get_default_timezone())
         # Retrieve user
         user = User.objects.get(username=username)
 
@@ -50,7 +52,7 @@ def register_user(request):
         email_subject = 'Account confirmation'
         email_body = "Hi %s, you have successfully registered but just one last step to get started. To activate your account, click this link within \
         48hours https://hidden-reef-1355.herokuapp.com/django_auth/confirm/%s. You will also receive a message on your phone number %s to confirm your number." % (
-        username, activation_key, new_profile.phone_number)
+            username, activation_key, new_profile.phone_number)
 
         send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
 
@@ -76,7 +78,8 @@ def dj_auth(request):
 def profile(request):
     user_profile = get_object_or_404(UserProfile,
                                      user=request.user)
-    return render_to_response('profile.html', {'full_name': request.user.username, 'phone_number': user_profile.phone_number})
+    return render_to_response('profile.html',
+                              {'full_name': request.user.username, 'phone_number': user_profile.phone_number})
 
 
 # No user
@@ -95,25 +98,48 @@ def register_success(request):
     return render_to_response('register_success.html')
 
 
+# Process email confirmation
 def confirm(request, activation_key):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/django_auth/')
     user_profile = get_object_or_404(UserProfile,
                                      activation_key=activation_key)
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
-       return render_to_response('invalid_code.html')
+        return render_to_response('invalid_code.html')
 
     user_account = user_profile.user
 
-    #generate random confirmation code
-    confirm_code = str(random.randint(1111,9999))
+    # generate random confirmation code
+    confirm_code = str(random.randint(1111, 9999))
     send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
 
-    #add confirmation code to user profile
+    # add confirmation code to user profile
     user_profile.sms_activation = confirm_code
     user_profile.save()
 
-    return render_to_response('confirm.html', {'success': True, 'phone': user_profile.phone_number})
+    params = {'success': True, 'phone': user_profile.phone_number}
+    params.update(csrf(request))
+
+    return render_to_response('confirm.html', params)
+
+
+# Process reg confirmation code
+def confirm_reg_code(request):
+    confirm_code = request.POST.get('confirm_code', '')
+
+    user_profile = get_object_or_404(UserProfile,
+                                         sms_activation=confirm_code)
+    # check if is correct confirmation code
+    if user_profile.sms_activation == confirm_code:
+        # set to active
+        user_account = user_profile.user
+        user_account.is_active = True
+        user_account.save()
+        # reset confirm code
+        user_profile.sms_activation = "000"
+        user_profile.save()
+    else:
+        return HttpResponseRedirect('/django_auth/invalid_code')
 
 
 # Send SMS
