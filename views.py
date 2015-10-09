@@ -138,6 +138,7 @@ def confirm_reg_code(request):
         # reset confirm code
         user_profile.sms_activation = "000"
         user_profile.save()
+        return HttpResponseRedirect('/django_auth')
     else:
         return HttpResponseRedirect('/django_auth/invalid_code')
 
