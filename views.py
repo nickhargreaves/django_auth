@@ -14,7 +14,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.core.mail import send_mail
 from twilio.rest import TwilioRestClient
 from django.conf import settings
-
+import random
 
 def index(request):
     args = {}
@@ -105,7 +105,9 @@ def confirm(request, activation_key):
 
     user_account = user_profile.user
 
-    send_sms(user_profile.phone_number, "test.this")
+    #generate random confirmation code
+    confirm_code = random.randint(1111,9999)
+    send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
 
     user_account.is_active = True
     user_account.save()
