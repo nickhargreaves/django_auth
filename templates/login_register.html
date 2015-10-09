@@ -57,7 +57,8 @@
       </div>
       <div class="logmod__tab lgm-2">
         <div class="logmod__heading">
-          <span class="logmod__heading-subtitle">Enter your email and password <strong>to sign in</strong></span>
+          <span class="logmod__heading-subtitle">Enter your email and password <strong>to sign in</strong></span><br />
+          {{confirmed}}
         </div>
           <form action="/django_auth/auth/" method="post">{% csrf_token %}
         <div class="logmod__form">

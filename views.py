@@ -139,7 +139,15 @@ def confirm_reg_code(request):
         # reset confirm code
         user_profile.sms_activation = "000"
         user_profile.save()
-        return HttpResponseRedirect('/django_auth')
+
+        # take to login
+        args = {}
+        args.update(csrf(request))
+
+        args['form'] = CustomRegistrationForm()
+        args['confirmed'] = "You have successfully confirmed your phone number!"
+
+        return render_to_response('login_register.html', args)
     else:
         return HttpResponseRedirect('/django_auth/invalid_code')
 
