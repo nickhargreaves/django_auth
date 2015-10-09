@@ -25,6 +25,7 @@ def index(request):
         args.update(csrf(request))
 
         args['form'] = CustomRegistrationForm()
+        args['page_title'] = "Login / Sign Up"
 
         return render_to_response('login_register.html', args)
 
@@ -83,7 +84,7 @@ def dj_auth(request):
         user_profile.save()
 
         # take to confirm login code screen
-        params = {'username': username, 'password': password, 'phone':user_profile.phone_number}  # TODO: find more secure way
+        params = {'username': username, 'password': password, 'phone':user_profile.phone_number, 'page_title':"Confirm Login Code"}  # TODO: find more secure way
         params.update(csrf(request))
 
         return render_to_response('confirm_login.html', params)
@@ -121,23 +122,23 @@ def confirm_login_code(request):
 # Show user profile
 def profile(request):
     return render_to_response('profile.html',
-                              {'full_name': request.user.username})
+                              {'full_name': request.user.username, 'page_title':'Profile'})
 
 
 # No user
 def invalid(request):
-    return render_to_response('invalid.html')
+    return render_to_response('invalid.html', {'page_title':'Invalid credentials'})
 
 
 # Logout
 def logout(request):
     auth.logout(request)
-    return render_to_response('logout.html')
+    return render_to_response('logout.html', {'page_title':'Logout'})
 
 
 # Register success
 def register_success(request):
-    return render_to_response('register_success.html')
+    return render_to_response('register_success.html', {'page_title':'Registration successfull'})
 
 
 # Process email confirmation
@@ -147,7 +148,7 @@ def confirm(request, activation_key):
     user_profile = get_object_or_404(UserProfile,
                                      activation_key=activation_key)
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
-        return render_to_response('invalid_code.html')
+        return render_to_response('invalid_code.html', {'page_title':'Invalid code'})
 
     # generate random confirmation code
     confirm_code = str(random.randint(1111, 9999))
@@ -157,7 +158,7 @@ def confirm(request, activation_key):
     user_profile.sms_activation = confirm_code
     user_profile.save()
 
-    params = {'success': True, 'phone': user_profile.phone_number}
+    params = {'success': True, 'phone': user_profile.phone_number, 'page_title':'Confirm code'}
     params.update(csrf(request))
 
     return render_to_response('confirm.html', params)
@@ -185,6 +186,7 @@ def confirm_reg_code(request):
 
         args['form'] = CustomRegistrationForm()
         args['confirmed'] = "You have successfully confirmed your phone number!"
+        args['page_title'] = "Successful confirmation"
 
         return render_to_response('login_register.html', args)
     else:
