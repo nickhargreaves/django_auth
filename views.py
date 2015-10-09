@@ -83,10 +83,10 @@ def dj_auth(request):
         user_profile.save()
 
         # take to confirm login code screen
-        params = {'username': username, 'password': password}  # TODO: find more secure way
+        params = {'username': username, 'password': password, 'phone':user_profile.phone_number}  # TODO: find more secure way
         params.update(csrf(request))
 
-        return render_to_response('confirm.html', params)
+        return render_to_response('confirm_login.html', params)
 
     else:
         return HttpResponseRedirect('/django_auth/invalid')
