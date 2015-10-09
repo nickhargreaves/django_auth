@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib import auth
 from django.core.context_processors import csrf
+from django.utils import timezone
 from forms import CustomRegistrationForm
 
 from django_auth.models import UserProfile
@@ -35,8 +36,7 @@ def register_user(request):
         phone = form.cleaned_data['phone']
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
         activation_key = hashlib.sha1(salt + email).hexdigest()
-        key_expires = datetime.datetime.today() + datetime.timedelta(2)
-
+        key_expires = timezone.make_aware(datetime.datetime.today() + datetime.timedelta(2), timezone.get_default_timezone())
         # Retrieve user
         user = User.objects.get(username=username)
 
@@ -95,20 +95,22 @@ def register_success(request):
     return render_to_response('register_success.html')
 
 
-# Confirm email
 def confirm(request, activation_key):
     if request.user.is_authenticated():
-        return render_to_response('confirm.html', {'has_account': True})
+        return HttpResponseRedirect('/django_auth/')
     user_profile = get_object_or_404(UserProfile,
                                      activation_key=activation_key)
-    if user_profile.key_expires < datetime.datetime.today():
-        return render_to_response('confirm.html', {'expired': True})
+    if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
+       return render_to_response('invalid.html')
+
     user_account = user_profile.user
-    phone = user_profile.phone_number
-    send_sms(phone, "test this")
+
+    send_sms(user_profile.phone_number, "test.this")
+
     user_account.is_active = True
     user_account.save()
-    return render_to_response('confirm.html', {'success': True, 'phone': phone})
+
+    return render_to_response('confirm.html', {'success': True, 'phone': user_profile.phone_number})
 
 
 # Send SMS
