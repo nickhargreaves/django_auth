@@ -47,7 +47,7 @@ def register_user(request):
 
         # Save profile
         new_profile = UserProfile(user=user, activation_key=activation_key,
-                                  key_expires=key_expires, phone_number=phone)
+                                  key_expires=key_expires, phone_number=phone, username=username)
         new_profile.save()
 
 
@@ -107,8 +107,6 @@ def confirm(request, activation_key):
                                      activation_key=activation_key)
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
         return render_to_response('invalid_code.html')
-
-    user_account = user_profile.user
 
     # generate random confirmation code
     confirm_code = str(random.randint(1111, 9999))
