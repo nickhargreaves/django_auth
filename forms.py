@@ -12,7 +12,7 @@ class CustomRegistrationForm(UserCreationForm):
         fields = ('username', 'email', 'password1', 'password2', 'phone')
 
     def save(self, commit=True):
-        user = super(UserCreationForm, self).save(commit=False)
+        user = super(CustomRegistrationForm, self).save(commit=False)
         user.email = self.cleaned_data['email']
         user.phone = self.cleaned_data['phone']
 
