@@ -101,7 +101,7 @@ def confirm(request, activation_key):
     user_profile = get_object_or_404(UserProfile,
                                      activation_key=activation_key)
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
-       return render_to_response('invalid.html')
+       return render_to_response('invalid_code.html')
 
     user_account = user_profile.user
 
