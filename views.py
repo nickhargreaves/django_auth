@@ -107,7 +107,7 @@ def confirm(request, activation_key):
 
     #generate random confirmation code
     confirm_code = random.randint(1111,9999)
-    send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
+    send_sms(user_profile.phone_number, "Your confirmation code is " + str(confirm_code))
 
     user_account.is_active = True
     user_account.save()
