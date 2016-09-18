@@ -55,11 +55,12 @@ def register_user(request):
 
         # Send email with activation key
         email_subject = 'Account confirmation'
-        email_body = "Hi %s, you have successfully registered but just one last step to get started. To activate your account, click this link within \
-        48hours https://hidden-reef-1355.herokuapp.com/django_auth/confirm/%s. You will also receive a message on your phone number %s to confirm your number." % (
-            username, activation_key, new_profile.phone_number)
-
-        send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
+        email_body = "Hi " + username + ", you have successfully registered but just one last step to get started. " \
+                     "To activate your account, click this link within 48hours " \
+                     + reverse('django_auth.confirm', args=[activation_key]) \
+                     + ". You will also receive a message on your phone number " + new_profile.phone_number \
+                     + " to confirm your number."
+        send_mail(email_subject, email_body, settings.FROM_EMAIL_ADDRESS, [email], fail_silently=False)
 
         return HttpResponseRedirect(reverse('django_auth.register_success'))
     else:
@@ -75,20 +76,24 @@ def dj_auth(request):
     if user is not None:
         # get user profile
         user_profile = get_object_or_404(UserProfile,
-                                         username=username)
-        # send confirmation code
-        confirm_code = str(random.randint(1111, 9999))
-        send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
+                                             username=username)
+        if settings.REQUIRE_PHONE_VERIFICATION_ON_LOGIN:
+            # send confirmation code
+            confirm_code = str(random.randint(1111, 9999))
+            send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
 
-        # add code to user profile
-        user_profile.sms_activation = confirm_code
-        user_profile.save()
+            # add code to user profile
+            user_profile.sms_activation = confirm_code
+            user_profile.save()
 
-        # take to confirm login code screen
-        params = {'username': username, 'password': password, 'phone':user_profile.phone_number, 'page_title':"Confirm Login Code"}  # TODO: find more secure way
-        params.update(csrf(request))
-
-        return render_to_response('confirm_login.html', params)
+            # take to confirm login code screen
+            params = {'username': username, 'password': password, 'phone':user_profile.phone_number, 'page_title':"Confirm Login Code"}  # TODO: find more secure way
+            params.update(csrf(request))
+            return render_to_response('confirm_login.html', params)
+        else:
+            request.user_profile = user_profile
+            request.bypass_confirm_phone = True
+            confirm_reg_code(request)
 
     else:
         return HttpResponseRedirect(reverse('django_auth.invalid'))
@@ -103,10 +108,10 @@ def confirm_login_code(request):
     if user is not None:
         confirm_code = request.POST.get('confirm_code', '')
 
-        user_profile = get_object_or_404(UserProfile,
+        user_profile = request.user_profile if request.user_profile else get_object_or_404(UserProfile,
                                          sms_activation=confirm_code)
         # check if is correct confirmation code
-        if user_profile.sms_activation == confirm_code:
+        if user_profile.sms_activation == confirm_code or request.bypass_confirm_phone:
             # login user
             auth.login(request, user)
             # reset confirm code
@@ -151,28 +156,32 @@ def confirm(request, activation_key):
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
         return render_to_response('invalid_code.html', {'page_title':'Invalid code'})
 
-    # generate random confirmation code
-    confirm_code = str(random.randint(1111, 9999))
-    send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
+    if settings.REQUIRE_PHONE_VERIFICATION_ON_REGISTER:
+        # generate random confirmation code
+        confirm_code = str(random.randint(1111, 9999))
+        send_sms(user_profile.phone_number, "Your confirmation code is " + confirm_code)
 
-    # add confirmation code to user profile
-    user_profile.sms_activation = confirm_code
-    user_profile.save()
+        # add confirmation code to user profile
+        user_profile.sms_activation = confirm_code
+        user_profile.save()
+        params = {'success': True, 'phone': user_profile.phone_number, 'page_title':'Confirm code'}
+        params.update(csrf(request))
 
-    params = {'success': True, 'phone': user_profile.phone_number, 'page_title':'Confirm code'}
-    params.update(csrf(request))
-
-    return render_to_response('confirm.html', params)
+        return render_to_response('confirm.html', params)
+    else:
+        request.user_profile = user_profile
+        request.bypass_confirm_phone = True
+        confirm_reg_code(request)
 
 
 # Process reg confirmation code
 def confirm_reg_code(request):
     confirm_code = request.POST.get('confirm_code', '')
 
-    user_profile = get_object_or_404(UserProfile,
+    user_profile = request.user_profile if request.user_profile else get_object_or_404(UserProfile,
                                      sms_activation=confirm_code)
     # check if is correct confirmation code
-    if user_profile.sms_activation == confirm_code:
+    if user_profile.sms_activation == confirm_code or request.bypas_confirm_phone:
         # set to active
         user_account = user_profile.user
         user_account.is_active = True
@@ -186,8 +195,12 @@ def confirm_reg_code(request):
         args.update(csrf(request))
 
         args['form'] = CustomRegistrationForm()
-        args['confirmed'] = "You have successfully confirmed your phone number!"
-        args['page_title'] = "Successful confirmation"
+        if request.bypass_confirm_phone:
+            args['confirmed'] = "You have successfully confirmed your phone number!"
+            args['page_title'] = "Successful Confirmation"
+        else:
+            args['confirmed'] = "You have successfully registered!"
+            args['page_title'] = "Successful Registration"
 
         return render_to_response('login_register.html', args)
     else:
