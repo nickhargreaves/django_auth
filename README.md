@@ -17,7 +17,7 @@ It does the following: login/logout, register, email + SMS confirmations with Tw
 
 2. Include the django_auth URLconf in your project urls.py like this::
 
-    `url(r'^django_auth/', include('django_auth.urls')),`
+    `url(r'^your-chosen-path/', include('django_auth.urls')),`
     
 3. Install Twilio 
 
@@ -33,16 +33,11 @@ It does the following: login/logout, register, email + SMS confirmations with Tw
     TWILLIO_TOKEN = ''
     TWILLIO_FROM = ''
     ```
-    
-6. Go to your projects main urls.py and add this to your URL 
 
-    `url(r'^django_auth/', include('django_auth.urls')),`
+6. Run `python manage.py migrate` to create the django_auth models.
 
 
-7. Run `python manage.py migrate` to create the django_auth models.
-
-
-8. Start the development server and visit http://127.0.0.1:8000/django_auth/
+7. Start the development server and visit http://127.0.0.1:8000/django_auth/
    
 
 ##### Demo

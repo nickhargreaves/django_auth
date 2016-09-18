@@ -5,7 +5,7 @@
 <h2>Hi {{full_name}}!</h2>
 
 <p>
-    <a href="/django_auth/logout">Logout</a>
+    <a href="{% url 'django_auth.logout' %}">Logout</a>
 </p>
 
 {% endblock %}

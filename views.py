@@ -15,11 +15,12 @@ from django.core.mail import send_mail
 from twilio.rest import TwilioRestClient
 from django.conf import settings
 import random
+from django.core.urlresolvers import reverse
 
 
 def index(request):
     if request.user.is_authenticated():
-        return HttpResponseRedirect('/django_auth/profile')
+        return HttpResponseRedirect(reverse('django_auth.profile'))
     else:
         args = {}
         args.update(csrf(request))
@@ -60,9 +61,9 @@ def register_user(request):
 
         send_mail(email_subject, email_body, 'mail@localhost', [email], fail_silently=False)
 
-        return HttpResponseRedirect('/django_auth/register_success')
+        return HttpResponseRedirect(reverse('django_auth.register_success'))
     else:
-        return HttpResponseRedirect('/django_auth/')
+        return HttpResponseRedirect(reverse('django_auth'))
 
 
 # Authentications
@@ -90,7 +91,7 @@ def dj_auth(request):
         return render_to_response('confirm_login.html', params)
 
     else:
-        return HttpResponseRedirect('/django_auth/invalid')
+        return HttpResponseRedirect(reverse('django_auth.invalid'))
 
 
 # Process login confirmation code
@@ -112,11 +113,11 @@ def confirm_login_code(request):
             user_profile.sms_activation = "000"
             user_profile.save()
             # take to profile
-            return HttpResponseRedirect('/django_auth/profile')
+            return HttpResponseRedirect(reverse('django_auth.profile'))
         else:
-            return HttpResponseRedirect('/django_auth/invalid_code')
+            return HttpResponseRedirect(reverse('django_auth.invalid_code'))
     else:
-        return HttpResponseRedirect('/django_auth/invalid')
+        return HttpResponseRedirect(reverse('django_auth.invalid_code'))
 
 
 # Show user profile
@@ -144,7 +145,7 @@ def register_success(request):
 # Process email confirmation
 def confirm(request, activation_key):
     if request.user.is_authenticated():
-        return HttpResponseRedirect('/django_auth/')
+        return HttpResponseRedirect(reverse('django_auth'))
     user_profile = get_object_or_404(UserProfile,
                                      activation_key=activation_key)
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
@@ -190,7 +191,7 @@ def confirm_reg_code(request):
 
         return render_to_response('login_register.html', args)
     else:
-        return HttpResponseRedirect('/django_auth/invalid_code')
+        return HttpResponseRedirect(reverse('django_auth.invalid_code'))
 
 
 # Send SMS

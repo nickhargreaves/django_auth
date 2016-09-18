@@ -14,7 +14,7 @@
           <span class="logmod__heading-subtitle">An SMS has been sent to your phone number {{phone}}. Enter the code below to complete the log in process.</span>
              {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
         </div>
-        <form action="/django_auth/confirm_login_code/" method="post">{% csrf_token %}
+        <form action="{% url 'django_auth.confirm_login_code' %}" method="post">{% csrf_token %}
         <div class="logmod__form">
             <div class="sminputs">
               <input type="hidden" name="username" value="{{ username }}">

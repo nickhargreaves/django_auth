@@ -3,7 +3,7 @@
 {% block content %}
 
     <h2>Register</h2>
-    <form action="/django_auth/register/" method="post">{% csrf_token %}
+    <form action="{% url 'django_auth.register' %}" method="post">{% csrf_token %}
         {{form}}
     <input type="submit" value="Register" />
     </form>
