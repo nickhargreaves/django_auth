@@ -6,7 +6,6 @@ urlpatterns = [
     url(r'^$', django_auth.views.index, name='django_auth'),
     url(r'^login/$', django_auth.views.index, name='django_auth.login'),
     url(r'^auth/$', django_auth.views.dj_auth, name='django_auth.auth'),
-    url(r'^profile/$', django_auth.views.profile, name='django_auth.profile'),
     url(r'^invalid/$', django_auth.views.invalid, name='django_auth.invalid'),
     url(r'^logout/$', django_auth.views.logout, name='django_auth.logout'),
     url(r'^register/$', django_auth.views.register_user, name='django_auth.register'),

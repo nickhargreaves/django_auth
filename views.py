@@ -16,11 +16,11 @@ from twilio.rest import TwilioRestClient
 from django.conf import settings
 import random
 from django.core.urlresolvers import reverse
-
+from django.contrib import messages
 
 def index(request):
     if request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('django_auth.profile'))
+        return HttpResponseRedirect(reverse('/'))
     else:
         args = {}
         args.update(csrf(request))
@@ -118,18 +118,11 @@ def confirm_login_code(request):
             user_profile.sms_activation = "000"
             user_profile.save()
             # take to profile
-            return HttpResponseRedirect(reverse('django_auth.profile'))
+            return HttpResponseRedirect(reverse('/'))
         else:
             return HttpResponseRedirect(reverse('django_auth.invalid_code'))
     else:
         return HttpResponseRedirect(reverse('django_auth.invalid_code'))
-
-
-# Show user profile
-def profile(request):
-    return render_to_response('profile.html',
-                              {'full_name': request.user.username, 'page_title':'Profile'})
-
 
 # No user
 def invalid(request):
