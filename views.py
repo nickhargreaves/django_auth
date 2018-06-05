@@ -1,25 +1,24 @@
-import json
-from django.contrib.auth.models import User
-from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
+import datetime
+import hashlib
+import random
+
+from django.conf import settings
 from django.contrib import auth
-from django.core.context_processors import csrf
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template.context_processors import csrf
+from django.urls import reverse
 from django.utils import timezone
-from forms import CustomRegistrationForm
+from twilio.rest import TwilioRestClient
 
 from django_auth.models import UserProfile
-import datetime, random, hashlib
-from django.shortcuts import render_to_response, get_object_or_404
-from django.core.mail import send_mail
-from twilio.rest import TwilioRestClient
-from django.conf import settings
-import random
-from django.core.urlresolvers import reverse
-from django.contrib import messages
+from .forms import CustomRegistrationForm
+
 
 def index(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('/'))
     else:
         args = {}
@@ -52,11 +51,10 @@ def register_user(request):
                                   key_expires=key_expires, phone_number=phone, username=username)
         new_profile.save()
 
-
         # Send email with activation key
         email_subject = 'Account confirmation'
         email_body = "Hi " + username + ", you have successfully registered but just one last step to get started. " \
-                     "To activate your account, click this link within 48hours " \
+                                        "To activate your account, click this link within 48hours " \
                      + reverse('django_auth.confirm', args=[activation_key]) \
                      + ". You will also receive a message on your phone number " + new_profile.phone_number \
                      + " to confirm your number."
@@ -76,7 +74,7 @@ def dj_auth(request):
     if user is not None:
         # get user profile
         user_profile = get_object_or_404(UserProfile,
-                                             username=username)
+                                         username=username)
         if settings.REQUIRE_PHONE_VERIFICATION_ON_LOGIN:
             # send confirmation code
             confirm_code = str(random.randint(1111, 9999))
@@ -87,7 +85,8 @@ def dj_auth(request):
             user_profile.save()
 
             # take to confirm login code screen
-            params = {'username': username, 'password': password, 'phone':user_profile.phone_number, 'page_title':"Confirm Login Code"}  # TODO: find more secure way
+            params = {'username': username, 'password': password, 'phone': user_profile.phone_number,
+                      'page_title': "Confirm Login Code"}  # TODO: find more secure way
             params.update(csrf(request))
             return render_to_response('confirm_login.html', params)
         else:
@@ -109,7 +108,7 @@ def confirm_login_code(request):
         confirm_code = request.POST.get('confirm_code', '')
 
         user_profile = request.user_profile if request.user_profile else get_object_or_404(UserProfile,
-                                         sms_activation=confirm_code)
+                                                                                           sms_activation=confirm_code)
         # check if is correct confirmation code
         if user_profile.sms_activation == confirm_code or request.bypass_confirm_phone:
             # login user
@@ -124,30 +123,31 @@ def confirm_login_code(request):
     else:
         return HttpResponseRedirect(reverse('django_auth.invalid_code'))
 
+
 # No user
 def invalid(request):
-    return render_to_response('invalid.html', {'page_title':'Invalid credentials'})
+    return render_to_response('invalid.html', {'page_title': 'Invalid credentials'})
 
 
 # Logout
 def logout(request):
     auth.logout(request)
-    return render_to_response('logout.html', {'page_title':'Logout'})
+    return render_to_response('logout.html', {'page_title': 'Logout'})
 
 
 # Register success
 def register_success(request):
-    return render_to_response('register_success.html', {'page_title':'Registration successfull'})
+    return render_to_response('register_success.html', {'page_title': 'Registration successfull'})
 
 
 # Process email confirmation
 def confirm(request, activation_key):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('django_auth'))
     user_profile = get_object_or_404(UserProfile,
                                      activation_key=activation_key)
     if user_profile.key_expires < timezone.make_aware(datetime.datetime.today(), timezone.get_default_timezone()):
-        return render_to_response('invalid_code.html', {'page_title':'Invalid code'})
+        return render_to_response('invalid_code.html', {'page_title': 'Invalid code'})
 
     if settings.REQUIRE_PHONE_VERIFICATION_ON_REGISTER:
         # generate random confirmation code
@@ -157,7 +157,7 @@ def confirm(request, activation_key):
         # add confirmation code to user profile
         user_profile.sms_activation = confirm_code
         user_profile.save()
-        params = {'success': True, 'phone': user_profile.phone_number, 'page_title':'Confirm code'}
+        params = {'success': True, 'phone': user_profile.phone_number, 'page_title': 'Confirm code'}
         params.update(csrf(request))
 
         return render_to_response('confirm.html', params)
@@ -172,7 +172,7 @@ def confirm_reg_code(request):
     confirm_code = request.POST.get('confirm_code', '')
 
     user_profile = request.user_profile if request.user_profile else get_object_or_404(UserProfile,
-                                     sms_activation=confirm_code)
+                                                                                       sms_activation=confirm_code)
     # check if is correct confirmation code
     if user_profile.sms_activation == confirm_code or request.bypas_confirm_phone:
         # set to active

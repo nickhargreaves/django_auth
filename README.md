@@ -1,6 +1,6 @@
-=====
+===========
 Django Auth
-=====
+===========
 
 Django Auth is a simple app for user authentication with Django. 
 
@@ -37,7 +37,7 @@ It does the following: login/logout, register, email + SMS confirmations with Tw
     ```
     REQUIRE_PHONE_VERIFICATION_ON_LOGIN = False # Set to true to enable Two-Factor Authentication
     REQUIRE_PHONE_VERIFICATION_ON_REGISTER = False # Set to true if you want users to confirm phone number
-    FROM_EMAIL_ADDRESS = "The email address to show as source of your confirmation address"
+    FROM_EMAIL_ADDRESS = '' # The email address to show as source of your confirmation address"
     ```
 
 6. Run `python manage.py migrate` to create the django_auth models.
