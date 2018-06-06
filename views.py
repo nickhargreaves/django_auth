@@ -19,7 +19,7 @@ from .forms import CustomRegistrationForm
 
 def index(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('/'))
+        return HttpResponseRedirect(reverse('index'))
     else:
         args = {}
         args.update(csrf(request))
@@ -35,12 +35,11 @@ def register_user(request):
     form = CustomRegistrationForm(request.POST)
     if form.is_valid():
         form.save()
-
         username = form.cleaned_data['username']
         email = form.cleaned_data['email']
         phone = form.cleaned_data['phone']
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        activation_key = hashlib.sha1(salt + email).hexdigest()
+        salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
+        activation_key = hashlib.sha1((salt + email).encode('utf-8')).hexdigest()
         key_expires = timezone.make_aware(datetime.datetime.today() + datetime.timedelta(2),
                                           timezone.get_default_timezone())
         # Retrieve user
@@ -48,19 +47,21 @@ def register_user(request):
 
         # Save profile
         new_profile = UserProfile(user=user, activation_key=activation_key,
-                                  key_expires=key_expires, phone_number=phone, username=username)
+                                  key_expires=key_expires, phone_number=phone)
         new_profile.save()
 
-        # Send email with activation key
-        email_subject = 'Account confirmation'
-        email_body = "Hi " + username + ", you have successfully registered but just one last step to get started. " \
-                                        "To activate your account, click this link within 48hours " \
-                     + reverse('django_auth.confirm', args=[activation_key]) \
-                     + ". You will also receive a message on your phone number " + new_profile.phone_number \
-                     + " to confirm your number."
-        send_mail(email_subject, email_body, settings.FROM_EMAIL_ADDRESS, [email], fail_silently=False)
-
-        return HttpResponseRedirect(reverse('django_auth.register_success'))
+        if settings.REQUIRE_EMAIL_VERIFICATION_ON_REGISTER:
+            # Send email with activation key
+            email_subject = 'Account confirmation'
+            email_body = "Hi " + username + ", you have successfully registered but just one last step to get started. " \
+                                            "To activate your account, click this link within 48hours " \
+                         + reverse('django_auth.confirm', args=[activation_key]) \
+                         + ". You will also receive a message on your phone number " + new_profile.phone_number \
+                         + " to confirm your number."
+            send_mail(email_subject, email_body, settings.FROM_EMAIL_ADDRESS, [email], fail_silently=False)
+            return HttpResponseRedirect(reverse('django_auth.register_success'))
+        else:
+            return confirm(request, activation_key)
     else:
         return HttpResponseRedirect(reverse('django_auth'))
 
@@ -71,10 +72,10 @@ def dj_auth(request):
     password = request.POST.get('password', '')
     user = auth.authenticate(username=username, password=password)
 
-    if user is not None:
+    if user:
         # get user profile
         user_profile = get_object_or_404(UserProfile,
-                                         username=username)
+                                         user__username=username)
         if settings.REQUIRE_PHONE_VERIFICATION_ON_LOGIN:
             # send confirmation code
             confirm_code = str(random.randint(1111, 9999))
@@ -92,7 +93,7 @@ def dj_auth(request):
         else:
             request.user_profile = user_profile
             request.bypass_confirm_phone = True
-            confirm_reg_code(request)
+            return confirm_login_code(request)
 
     else:
         return HttpResponseRedirect(reverse('django_auth.invalid'))
@@ -117,7 +118,7 @@ def confirm_login_code(request):
             user_profile.sms_activation = "000"
             user_profile.save()
             # take to profile
-            return HttpResponseRedirect(reverse('/'))
+            return HttpResponseRedirect(reverse('index'))
         else:
             return HttpResponseRedirect(reverse('django_auth.invalid_code'))
     else:
@@ -164,7 +165,7 @@ def confirm(request, activation_key):
     else:
         request.user_profile = user_profile
         request.bypass_confirm_phone = True
-        confirm_reg_code(request)
+        return confirm_reg_code(request)
 
 
 # Process reg confirmation code
@@ -174,7 +175,7 @@ def confirm_reg_code(request):
     user_profile = request.user_profile if request.user_profile else get_object_or_404(UserProfile,
                                                                                        sms_activation=confirm_code)
     # check if is correct confirmation code
-    if user_profile.sms_activation == confirm_code or request.bypas_confirm_phone:
+    if user_profile.sms_activation == confirm_code or request.bypass_confirm_phone:
         # set to active
         user_account = user_profile.user
         user_account.is_active = True
@@ -188,7 +189,7 @@ def confirm_reg_code(request):
         args.update(csrf(request))
 
         args['form'] = CustomRegistrationForm()
-        if request.bypass_confirm_phone:
+        if not request.bypass_confirm_phone:
             args['confirmed'] = "You have successfully confirmed your phone number!"
             args['page_title'] = "Successful Confirmation"
         else:

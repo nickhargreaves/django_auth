@@ -1,11 +1,13 @@
-{% extends "base.html" %}
+{% extends "site_base.html" %}
 
-{% block content %}
+{% block body %}
 
+<div class="text-center">
 <h2>You've been logged out!</h2>
 
 <p>
     <a href="{% url 'django_auth' %}">Log in again.</a>
 </p>
+</div>
 
 {% endblock %}
