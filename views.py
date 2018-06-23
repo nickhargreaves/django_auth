@@ -26,7 +26,10 @@ def index(request):
 
         args['form'] = CustomRegistrationForm()
         args['page_title'] = "Login / Sign Up"
-
+        if request.GET.get('invalid', None):
+            args['invalid_user'] = True
+        if request.GET.get('reg_success', None):
+            args['reg_message'] = request.GET.get('reg_message')
         return render_to_response('login_register.html', args)
 
 
@@ -59,11 +62,15 @@ def register_user(request):
                          + ". You will also receive a message on your phone number " + new_profile.phone_number \
                          + " to confirm your number."
             send_mail(email_subject, email_body, settings.FROM_EMAIL_ADDRESS, [email], fail_silently=False)
-            return HttpResponseRedirect(reverse('django_auth.register_success'))
+            return HttpResponseRedirect(reverse('django_auth') + '?reg_success=True&reg_message='
+                                        + 'Account confirmation email sent. Please check your email')
         else:
             return confirm(request, activation_key)
     else:
-        return HttpResponseRedirect(reverse('django_auth'))
+        args = {}
+        args.update(csrf(request))
+        args.update({'form': form})
+        return render_to_response('login_register.html', args)
 
 
 # Authentications
@@ -96,7 +103,7 @@ def dj_auth(request):
             return confirm_login_code(request)
 
     else:
-        return HttpResponseRedirect(reverse('django_auth.invalid'))
+        return HttpResponseRedirect(reverse('django_auth') + "?invalid=True")
 
 
 # Process login confirmation code
@@ -125,20 +132,10 @@ def confirm_login_code(request):
         return HttpResponseRedirect(reverse('django_auth.invalid_code'))
 
 
-# No user
-def invalid(request):
-    return render_to_response('invalid.html', {'page_title': 'Invalid credentials'})
-
-
 # Logout
 def logout(request):
     auth.logout(request)
-    return render_to_response('logout.html', {'page_title': 'Logout'})
-
-
-# Register success
-def register_success(request):
-    return render_to_response('register_success.html', {'page_title': 'Registration successfull'})
+    return HttpResponseRedirect(reverse('index'))
 
 
 # Process email confirmation
@@ -190,13 +187,11 @@ def confirm_reg_code(request):
 
         args['form'] = CustomRegistrationForm()
         if not request.bypass_confirm_phone:
-            args['confirmed'] = "You have successfully confirmed your phone number!"
-            args['page_title'] = "Successful Confirmation"
+            confirmed = "You have successfully confirmed your phone number!"
         else:
-            args['confirmed'] = "You have successfully registered!"
-            args['page_title'] = "Successful Registration"
-
-        return render_to_response('login_register.html', args)
+            confirmed = "You have successfully registered!"
+        confirmed += ' Please log in to continue.'
+        return HttpResponseRedirect(reverse('django_auth') + "?reg_success=True&reg_message=" + confirmed)
     else:
         return HttpResponseRedirect(reverse('django_auth.invalid_code'))
 

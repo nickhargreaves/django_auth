@@ -2,97 +2,105 @@
 
 {% block content %}
 
-{% if form.errors %}
-  <p class="error">Sorry, that's not a valid username or password</p>
-{% endif %}
-<div class="logmod">
-  <div class="logmod__wrapper">
-    <div class="logmod__container">
-      <ul class="logmod__tabs">
-        <li data-tabtar="lgm-2"><a href="#">Login</a></li>
-        <li data-tabtar="lgm-1"><a href="#">Register</a></li>
-      </ul>
-      <div class="logmod__tab-wrapper">
-      <div class="logmod__tab lgm-1">
-        <div class="logmod__heading">
-          <span class="logmod__heading-subtitle">Enter your personal details <strong>to create an acount</strong></span>
-        </div>
-        <form action="{% url 'django_auth.register' %}" method="post">{% csrf_token %}
-        <div class="logmod__form">
-            <div class="sminputs">
-              <div class="input full">
-                <label class="string optional" for="id_email">Email*</label>
-                <input class="string optional" maxlength="255" id="id_email" name="email" placeholder="Email" type="email" size="50" />
-              </div>
-              <div class="input full">
-                <label class="string optional" for="username">Username*</label>
-                <input id="id_username" maxlength="30" name="username" type="text" placeholder="Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only"/>
-              </div>
+<div>
+    <ul class="nav nav-pills nav-fill" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="login-tab" data-toggle="tab" href="#login" role="tab" aria-controls="login"
+               aria-selected="true">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="register-tab" data-toggle="tab" href="#register" role="tab" aria-controls="register"
+               aria-selected="false">Register</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="login-reg-tab-content">
+        {% if form.errors %}
+            {% for error in form.errors.items %}
+            <div class="alert alert-danger" role="alert">
+              {{ error|escape }}
             </div>
-            <div class="sminputs">
-              <div class="input string optional">
-                <label class="string optional" for="id_password1">Password *</label>
-                <input class="string optional" maxlength="255" placeholder="Password" size="50" id="id_password1" name="password1" type="password"/>
-              </div>
-              <div class="input string optional">
-                <label class="string optional" for="id_password2">Repeat password *</label>
-                <input class="string optional" maxlength="255" placeholder="Password" size="50" id="id_password2" name="password2" type="password"/>
+            {% endfor %}
+        {% endif %}
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ error }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% if reg_message %}
+            <div class="alert alert-success" role="alert">
+              {{ reg_message }}
+            </div>
+        {% endif %}
+        {% if invalid_user %}
+            <div class="alert alert-danger" role="alert">
+              Incorrect log in details. Please check email and password.
+            </div>
+        {% endif %}
+        <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+            <form class="loginregform" action="{% url 'django_auth.auth' %}" method="post">
+                {% csrf_token %}
+                <div class="form-label-group">
+                    <input type="text" id="inputUsername" name="username" class="form-control" placeholder="Username" required>
+                    <label for="inputUsername">Username</label>
+                </div>
 
-              </div>
+                <div class="form-label-group">
+                    <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+                    <label for="inputPassword">Password</label>
+                </div>
 
-              <div class="input full">
-                <label class="string optional" for="id_phone">Phone Number*</label>
-                <input id="id_phone" maxlength="30" name="phone" type="text" placeholder="Your mobile number"/>
-              </div>
-            </div>
+                <div class="checkbox mb-3">
+                    <label>
+                        <input type="checkbox" value="remember-me"> Remember me
+                    </label>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                <p class="mt-5 mb-3 text-center">Don't have account yet? <a onclick="showRegister()">Register</a></p>
+            </form>
+
         </div>
-          <div class="logmod__alter">
-          <div class="logmod__alter-container">
-              <div class="connect__context">
-                <input type="submit" value="Register"  class="connect googleplus"/>
-              </div>
-          </div>
+        <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+            <form class="loginregform" action="{% url 'django_auth.register' %}" method="post">
+                {% csrf_token %}
+                <div class="form-label-group">
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Email address"
+                           required>
+                    <label for="email">Email address</label>
+                </div>
+                <div class="form-label-group">
+                    <input type="text" id="id_username" name="username" class="form-control" placeholder="Username">
+                    <label for="id_username">Username</label>
+                </div>
+
+                <div class="form-label-group">
+                    <input type="password" id="id_password1" name="password1" class="form-control"
+                           placeholder="Password" required>
+                    <label for="id_password1">Password</label>
+                </div>
+                <div class="form-label-group">
+                    <input type="password" id="id_password2" name="password2" class="form-control"
+                           placeholder="Repeat Password" required>
+                    <label for="id_password2">Repeat Password</label>
+                </div>
+                <div class="form-label-group">
+                    <input type="text" id="id_phone" name="phone" class="form-control" placeholder="Phone Number">
+                    <label for="id_phone">Phone Number</label>
+                </div>
+
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+                <p class="mt-5 mb-3 text-center">Already registered? <a onclick="showLogin()">Login</a></p>
+            </form>
         </div>
-          </form>
-      </div>
-      <div class="logmod__tab lgm-2">
-        <div class="logmod__heading">
-          {% if form.non_field_errors %}
-              <ul class='form-errors'>
-                  {% for error in form.non_field_errors %}
-                      <li>{{ error }}</li>
-                  {% endfor %}
-              </ul>
-          {% endif %}
-          <span class="logmod__heading-subtitle">Enter your email and password <strong>to sign in</strong></span><br />
-          {{confirmed}}
-        </div>
-          <form action="{% url 'django_auth.auth' %}" method="post">{% csrf_token %}
-        <div class="logmod__form">
-            <div class="sminputs">
-              <div class="input full">
-                <label class="string optional" for="username">Username*</label>
-                <input class="string optional" type="text" name="username" value="" id="username" size="50" placeholder="Username">
-              </div>
-            </div>
-            <div class="sminputs">
-              <div class="input full">
-                <label class="string optional" for="user-pw">Password *</label>
-                <input class="string optional" maxlength="255" id="user-pw" placeholder="Password" type="password" size="50" name="password" />
-              </div>
-            </div>
-        </div>
-        <div class="logmod__alter">
-          <div class="logmod__alter-container">
-              <div class="connect__context">
-                <input type="submit" value="login"  class="connect facebook"/>
-              </div>
-          </div>
-        </div>
-          </form>
-          </div>
-      </div>
     </div>
-  </div>
 </div>
+<script>
+    function showRegister(){
+        $('#register').tab('show');
+    }
+    function showLogin(){
+        $('#login').tab('show');
+    }
+</script>
 {% endblock %}
