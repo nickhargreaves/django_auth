@@ -5,6 +5,7 @@ import random
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
@@ -57,8 +58,8 @@ def register_user(request):
             # Send email with activation key
             email_subject = 'Account confirmation'
             email_body = "Hi " + username + ", you have successfully registered but just one last step to get started. " \
-                                            "To activate your account, click this link within 48hours " \
-                         + reverse('django_auth.confirm', args=[activation_key]) \
+                                            "To activate your account, click this link within 48hours " +\
+                         "https://" + Site.objects.get_current().domain + reverse('django_auth.confirm', args=[activation_key]) \
                          + ". You will also receive a message on your phone number " + new_profile.phone_number \
                          + " to confirm your number."
             send_mail(email_subject, email_body, settings.FROM_EMAIL_ADDRESS, [email], fail_silently=False)
