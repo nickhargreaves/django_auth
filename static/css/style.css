@@ -87,3 +87,7 @@ body {
   min-height: 500px;
   margin-top: 15px;
 }
+.fake_link{
+    color: #007bff !important;
+    cursor: pointer;
+}

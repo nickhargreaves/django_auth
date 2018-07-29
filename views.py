@@ -59,7 +59,7 @@ def register_user(request):
             email_subject = 'Account confirmation'
             email_body = "Hi " + username + ", you have successfully registered but just one last step to get started. " \
                                             "To activate your account, click this link within 48hours " +\
-                         "https://" + Site.objects.get_current().domain + reverse('django_auth.confirm', args=[activation_key]) \
+                         "https://www." + Site.objects.get_current().domain + reverse('django_auth.confirm', args=[activation_key]) \
                          + ". You will also receive a message on your phone number " + new_profile.phone_number \
                          + " to confirm your number."
             send_mail(email_subject, email_body, settings.FROM_EMAIL_ADDRESS, [email], fail_silently=False)
@@ -70,7 +70,7 @@ def register_user(request):
     else:
         args = {}
         args.update(csrf(request))
-        args.update({'form': form})
+        args.update({'form': form, 'register': True})
         return render_to_response('login_register.html', args)
 
 

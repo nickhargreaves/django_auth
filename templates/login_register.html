@@ -58,7 +58,7 @@
                 </div>
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
                 <p class="mt-5 mb-3 text-center">
-                    Don't have account yet? <a onclick="showRegister()">Register</a>
+                    Don't have account yet? <a class="fake_link" onclick="showRegister()">Register</a>
                         <br/>
                     <a href="{% url 'password_reset' %}">Forgot Password?</a>
                 </p>
@@ -94,17 +94,25 @@
                 </div>
 
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-                <p class="mt-5 mb-3 text-center">Already registered? <a onclick="showLogin()">Login</a></p>
+                <p class="mt-5 mb-3 text-center">Already registered? <a class="fake_link" onclick="showLogin()">Login</a></p>
             </form>
         </div>
     </div>
 </div>
+<script src='https://code.jquery.com/jquery-3.2.1.slim.min.js'></script> <!---TODO: fix hardcording -->
+<script src="https://getbootstrap.com/docs/4.0/dist/js/bootstrap.min.js"></script>
 <script>
+    $( document ).ready(function() {
+        if ('{{ register }}' == 'True'){
+            $('#register-tab').click();
+        }
+    });
+
     function showRegister(){
-        $('#register').tab('show');
+        $('#register-tab').click();
     }
     function showLogin(){
-        $('#login').tab('show');
+        $('#login-tab').click();
     }
 </script>
 {% endblock %}
