@@ -8,3 +8,6 @@ class UserProfile(models.Model):
     key_expires = models.DateTimeField(null=True, blank=True)
     phone_number = models.CharField(max_length=40, null=True, blank=True)
     sms_activation = models.CharField(max_length=40, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
